@@ -7,4 +7,3 @@
     "start": "node backend/index.js"
   }
 }
-
