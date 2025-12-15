@@ -13,7 +13,6 @@ import { app, server } from "./lib/soket.js";
 
 const PORT = process.env.PORT || 5001;
 const __dirname = path.resolve();
-
 /* ------------------ middlewares ------------------ */
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
