@@ -3,7 +3,6 @@ dotenv.config();
 
 import express from "express";
 import path from "path";
-import fs from "fs";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 
@@ -14,25 +13,6 @@ import { app, server } from "./lib/soket.js";
 
 const PORT = process.env.PORT || 5001;
 const __dirname = path.resolve();
-
-// Basic env validation to avoid silent failures in production
-const requiredEnvs = ["MONGODB_URL"];
-const missingEnvs = requiredEnvs.filter((k) => !process.env[k]);
-if (missingEnvs.length) {
-  console.error(
-    "Missing required environment variables:",
-    missingEnvs.join(", ")
-  );
-  console.error(
-    "The server may fail to connect to external services without these."
-  );
-}
-
-console.log(
-  `Starting server with NODE_ENV=${
-    process.env.NODE_ENV || "undefined"
-  } on PORT=${PORT}`
-);
 
 /* ------------------ middlewares ------------------ */
 app.use(express.json({ limit: "10mb" }));
@@ -51,20 +31,13 @@ app.use(
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 
-/* ------------------ serve frontend (if built) ------------------ */
-const frontendDist = path.join(__dirname, "../frontend/dist");
-if (fs.existsSync(frontendDist)) {
-  console.log(
-    "Frontend dist found — enabling static file serving from:",
-    frontendDist
-  );
-  app.use(express.static(frontendDist));
+/* ------------------ serve frontend ------------------ */
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
   app.get("*", (req, res) => {
-    res.sendFile(path.join(frontendDist, "index.html"));
+    res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
   });
-} else {
-  console.log("No frontend dist found at:", frontendDist);
 }
 
 /* ❌ REMOVE THIS — VERY IMPORTANT
@@ -86,17 +59,4 @@ server.on("error", (err) => {
     console.error(`Port ${PORT} already in use`);
     process.exit(1);
   }
-});
-
-// Global error handlers to ensure the process exits on fatal errors
-process.on("unhandledRejection", (reason, promise) => {
-  console.error("Unhandled Rejection at:", promise, "reason:", reason);
-  // Recommended: perform cleanup here if needed
-  process.exit(1);
-});
-
-process.on("uncaughtException", (err) => {
-  console.error("Uncaught Exception thrown:", err);
-  // Recommended: perform cleanup here if needed
-  process.exit(1);
 });
