@@ -1,14 +1,12 @@
-// tailwind.config.js
+import daisyui from "daisyui";
 
 /** @type {import('tailwindcss').Config} */
-module.exports = {
-  // 'export default' को 'module.exports' से बदलें
+export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {},
   },
-  // 'import daisyui from "daisyui";' को हटा दें और इसे सीधे plugins array में 'require' करें
-  plugins: [require("daisyui")],
+  plugins: [daisyui],
   daisyui: {
     themes: [
       "light",
